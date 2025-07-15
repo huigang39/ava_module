@@ -1,0 +1,33 @@
+# author: Huigang Wang
+# email: huigang39@outlook.com
+# version: 0.2
+# date: 2025-06-18
+
+---
+BasedOnStyle: GNU
+# UseTab: ForIndentation
+TabWidth: 2
+IndentWidth: 2
+
+---
+Language: Cpp
+# 指针对齐方式
+PointerAlignment: Right
+# 控制左大括号位置
+BreakBeforeBraces: Attach
+# 最大行宽
+ColumnLimit: 100
+# 控制左圆括号前是否有空格
+SpaceBeforeParens: ControlStatements
+# 对齐连续声明的变量
+AlignConsecutiveDeclarations: true
+# 对齐连续赋值的变量
+AlignConsecutiveAssignments: true
+# 对齐函数形参(若需要折行)
+BinPackParameters: false
+# 对齐函数实参(若需要折行)
+BinPackArguments: false
+# 对齐连续宏(跨空行)
+AlignConsecutiveMacros: AcrossEmptyLines
+# 换行反斜杠对齐方式
+AlignEscapedNewlines: Right
