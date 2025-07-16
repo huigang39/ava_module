@@ -17,7 +17,7 @@ typedef SOCKET socket_t;
 
 #include <stdio.h>
 
-#include "typedef.h"
+#include "util/typedef.h"
 
 typedef enum {
   NET_TYPE_NONE,

@@ -5,6 +5,8 @@
 extern "C" {
 #endif
 
+#include <stdio.h>
+
 #define __USE_GNU
 #ifdef __linux__
 #include <pthread.h>

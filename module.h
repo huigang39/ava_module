@@ -5,6 +5,8 @@
 extern "C" {
 #endif
 
+#include "comm/net.h"
+
 #include "scheduler/scheduler.h"
 
 #include "logger/logger.h"

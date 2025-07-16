@@ -5,7 +5,10 @@
 extern "C" {
 #endif
 
+#ifdef ARM_MATH
 #include "arm_math.h"
+#endif
+
 #include "fastmath.h"
 #include "typedef.h"
 
@@ -37,7 +40,7 @@ typedef struct {
   U32         cycles_per_op;
 } benchmark_t;
 
-/* 整数运算 */                                                                                     \
+/* 整数运算 */                                                                                 \
 #define TEST_INT_ADD(result, iterations)                                                           \
   do {                                                                                             \
     MEASURE_TIME(result.cycles_total, "int_add", iterations, {                                     \
@@ -71,7 +74,7 @@ typedef struct {
     cnt++;                                                                                         \
   } while (0)
 
-/* 浮点运算 */                                                                                     \
+/* 浮点运算 */                                                                                 \
 #define TEST_FLOAT_ADD(result, iterations)                                                         \
   do {                                                                                             \
     MEASURE_TIME(result.cycles_total, "float_add", iterations, {                                   \
@@ -105,7 +108,7 @@ typedef struct {
     cnt++;                                                                                         \
   } while (0)
 
-/* 三角函数 */                                                                                     \
+/* 三角函数 */                                                                                 \
 #define TEST_SINF(result, iterations)                                                              \
   do {                                                                                             \
     MEASURE_TIME(result.cycles_total, "sinf", iterations, {                                        \
@@ -139,6 +142,7 @@ typedef struct {
     cnt++;                                                                                         \
   } while (0)
 
+#ifdef ARM_MATH
 #define TEST_ARM_SINF(result, iterations)                                                          \
   do {                                                                                             \
     MEASURE_TIME(result.cycles_total, "arm_sinf", iterations, {                                    \
@@ -160,6 +164,7 @@ typedef struct {
     result.name          = "arm_cosf";                                                             \
     cnt++;                                                                                         \
   } while (0)
+#endif
 
 #define TEST_FAST_SINF(result, iterations)                                                         \
   do {                                                                                             \
@@ -238,7 +243,7 @@ typedef struct {
     cnt++;                                                                                         \
   } while (0)
 
-/* 其他数学函数 */                                                                                 \
+/* 其他数学函数 */                                                                           \
 #define TEST_SQRTF(result, iterations)                                                             \
   do {                                                                                             \
     MEASURE_TIME(result.cycles_total, "sqrtf", iterations, {                                       \

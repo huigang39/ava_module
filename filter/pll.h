@@ -76,7 +76,7 @@ pll_run(pll_filter_t *pll) {
   lo->pi_out    = lo->kp * lo->err + lo->ki_out;
   out->vel_rads = lo->pi_out;
   out->theta_rad += out->vel_rads * FP32_HZ_TO_S(cfg->freq_hz);
-  WARP2_PI(out->theta_rad);
+  WARP_2PI(out->theta_rad);
 
   out->vel_rads_filter = lo->gain * out->vel_rads_filter + (FP32_1 - lo->gain) * out->vel_rads;
 }

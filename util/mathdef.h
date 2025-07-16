@@ -32,6 +32,7 @@ extern "C" {
 #define FP32_COS(x)      cosf(x)
 #define FP32_EXP(x)      expf(x)
 #define FP32_ATAN2(y, x) atan2f(y, x)
+#define FP32_ABS(x)      fabsf(x)
 #define FP32_MOD(x, y)   fmodf(x, y) // __hardfp_fmodf
 #endif
 
