@@ -85,10 +85,8 @@ fast_expf(FP32 x) {
 static inline FP32
 fast_absf(FP32 x) {
   FP32 y = x;
-
-  if (x < (float)0.0f)
+  if (x < 0.0f)
     y = -x;
-
   return y;
 }
 

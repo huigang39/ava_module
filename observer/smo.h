@@ -1,5 +1,5 @@
-#ifndef OBSERVER_H
-#define OBSERVER_H
+#ifndef SMO_H
+#define SMO_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -75,8 +75,8 @@ smo_run(smo_obs_t *smo) {
 
   AB_SUB_3ARG(lo->i_ab_obs_err, out->i_ab_obs, in->i_ab);
 
-  float sign_alpha = 2 / (FP32_EXP(-lo->i_ab_obs_err.a * cfg->kp) + 1.0f) - 1;
-  float sign_beta  = 2 / (FP32_EXP(-lo->i_ab_obs_err.b * cfg->kp) + 1.0f) - 1;
+  FP32 sign_alpha = 2 / (FP32_EXP(-lo->i_ab_obs_err.a * cfg->kp) + FP32_1) - 1.0f;
+  FP32 sign_beta  = 2 / (FP32_EXP(-lo->i_ab_obs_err.b * cfg->kp) + FP32_1) - 1.0f;
 
   out->v_ab_emf.a = sign_alpha;
   out->v_ab_emf.b = sign_beta;
@@ -101,4 +101,4 @@ smo_run_in(smo_obs_t *smo, fp32_ab_t i_ab, fp32_ab_t v_ab) {
 }
 #endif
 
-#endif //! OBSERVER_H
+#endif // !SMO_H

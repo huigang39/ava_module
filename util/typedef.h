@@ -21,6 +21,7 @@ typedef signed long long   I64;
 typedef float  FP32;
 typedef double FP64;
 
+#ifndef __WIN32
 #ifdef __cplusplus
 typedef bool BOOL;
 #define TRUE  true
@@ -29,6 +30,7 @@ typedef bool BOOL;
 typedef U8 BOOL;
 #define TRUE  1
 #define FALSE 0
+#endif
 #endif
 
 typedef struct {

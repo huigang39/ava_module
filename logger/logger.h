@@ -5,15 +5,15 @@
 extern "C" {
 #endif
 
+#include <stdarg.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "fifo/fifo.h"
-
-#define LOGGER_NEWLINE_SIGN   ('\n')
+#include "util/util.h"
 
 #define LOGGER_TIMESTAMP_SIZE (32)
 #define LOGGER_LEVEL_SIZE     (16)
-
 #define LOGGER_MSG_SIZE       (256)
 #define FIFO_BUF_SIZE         (1024 * 1024)
 
@@ -30,12 +30,12 @@ typedef enum {
   LOGGER_BINARY,
 } logger_type_e;
 
-typedef void (*logger_flush_f)(FILE *file, char *str, U32 len);
+typedef void (*logger_print_f)(FILE *file, char *str, U32 len);
 typedef U64 (*logger_ts_f)(void);
 
 typedef struct {
   logger_ts_f    f_ts;
-  logger_flush_f f_flush;
+  logger_print_f f_print;
 } logger_ops_t;
 
 typedef struct {
@@ -85,12 +85,6 @@ typedef struct {
   logger_ops_t *prefix##_ops = &prefix##_p->ops;
 
 static inline void
-logger_header_add(U64 ts, logger_level_e e_level, logger_out_t *out) {
-  logger_ts_to_str(get_real_timestamns(), out->ts);
-  logger_level_to_str(e_level, out->level);
-}
-
-static inline void
 logger_ts_to_str(U64 ts, char *buf) {
   snprintf(buf, LOGGER_TIMESTAMP_SIZE, "[%llu]", ts);
 }
@@ -100,24 +94,29 @@ logger_level_to_str(logger_level_e e_level, char *buf) {
   switch (e_level) {
   case LOGGER_LEVEL_DATA:
     strcpy(buf, "[DATA]");
-    break;
+    return;
   case LOGGER_LEVEL_DEBUG:
     strcpy(buf, "[DEBUG]");
-    break;
+    return;
   case LOGGER_LEVEL_INFO:
     strcpy(buf, "[INFO]");
-    break;
+    return;
   case LOGGER_LEVEL_WARN:
     strcpy(buf, "[WARN]");
-    break;
+    return;
   case LOGGER_LEVEL_ERROR:
     strcpy(buf, "[ERROR]");
-    break;
+    return;
   default:
     strcpy(buf, "[UNKNOW]");
-    break;
+    return;
   }
-  return;
+}
+
+static inline void
+logger_header_add(U64 ts, logger_level_e e_level, logger_out_t *out) {
+  logger_ts_to_str(get_real_ts_ms(), out->ts);
+  logger_level_to_str(e_level, out->level);
 }
 
 static inline void
@@ -125,6 +124,20 @@ logger_init(logger_t *logger, logger_cfg_t logger_cfg) {
   DECL_LOGGER_PTRS(logger);
 
   *cfg = logger_cfg;
+
+  sfifo_t *fifo = &lo->fifo;
+  SFIFO_INIT(fifo);
+}
+
+static inline void
+logger_flush(logger_t *logger) {
+  DECL_LOGGER_PTRS(logger);
+
+  U8 str[sizeof(logger_out_t)];
+
+  sfifo_t *fifo = &lo->fifo;
+  FIFO_GET(fifo, str, sizeof(out));
+  ops->f_print(in->file, (char *)str, sizeof(out));
 }
 
 static inline void
@@ -136,7 +149,9 @@ logger_write(logger_t *logger, const char *format, ...) {
   out->len = vsnprintf((char *)out->msg, LOGGER_MSG_SIZE, format, args);
   va_end(args);
 
-  FIFO_PUT(&lo->fifo, (U8 *)out, sizeof(*out));
+  sfifo_t *fifo = &lo->fifo;
+  FIFO_PUT(fifo, out, sizeof(*out));
+  logger_flush(logger);
 }
 
 #ifdef __cplusplus

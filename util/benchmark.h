@@ -1,5 +1,5 @@
-#ifndef COREMARK_H
-#define COREMARK_H
+#ifndef BENCHMARK_H
+#define BENCHMARK_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -37,7 +37,7 @@ typedef struct {
   U32         cycles_per_op;
 } benchmark_t;
 
-/* 整数运算 */                                                                                 \
+/* 整数运算 */                                                                                     \
 #define TEST_INT_ADD(result, iterations)                                                           \
   do {                                                                                             \
     MEASURE_TIME(result.cycles_total, "int_add", iterations, {                                     \
@@ -71,7 +71,7 @@ typedef struct {
     cnt++;                                                                                         \
   } while (0)
 
-/* 浮点运算 */                                                                                 \
+/* 浮点运算 */                                                                                     \
 #define TEST_FLOAT_ADD(result, iterations)                                                         \
   do {                                                                                             \
     MEASURE_TIME(result.cycles_total, "float_add", iterations, {                                   \
@@ -105,7 +105,7 @@ typedef struct {
     cnt++;                                                                                         \
   } while (0)
 
-/* 三角函数 */                                                                                 \
+/* 三角函数 */                                                                                     \
 #define TEST_SINF(result, iterations)                                                              \
   do {                                                                                             \
     MEASURE_TIME(result.cycles_total, "sinf", iterations, {                                        \
@@ -238,7 +238,7 @@ typedef struct {
     cnt++;                                                                                         \
   } while (0)
 
-/* 其他数学函数 */                                                                           \
+/* 其他数学函数 */                                                                                 \
 #define TEST_SQRTF(result, iterations)                                                             \
   do {                                                                                             \
     MEASURE_TIME(result.cycles_total, "sqrtf", iterations, {                                       \
@@ -310,4 +310,4 @@ typedef struct {
 }
 #endif
 
-#endif //! COREMARK_H
+#endif //! BENCHMARK_H

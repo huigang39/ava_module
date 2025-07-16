@@ -24,9 +24,9 @@ typedef struct {
 
 typedef struct {
   FP32 err;
-  FP32 err_theta;
+  FP32 err_theta_rad;
   FP32 prev_theta_rad;
-  FP32 intergral;
+  FP32 ki_out;
   FP32 pi_out;
   FP32 kp;
   FP32 ki;
@@ -72,11 +72,11 @@ pll_run(pll_filter_t *pll) {
   lo->gain     = FP32_1 / (FP32_1 + FP32_2PI * cfg->wc * FP32_HZ_TO_S(cfg->freq_hz));
   lo->gain_ffd = FP32_1 / (FP32_1 + FP32_2PI * cfg->wc * FP32_1_DIV_2 * FP32_HZ_TO_S(cfg->freq_hz));
   lo->err      = in->val.b * FP32_COS(out->theta_rad) - in->val.a * FP32_SIN(out->theta_rad);
-  lo->intergral += lo->ki * lo->err;
-  lo->pi_out    = lo->kp * lo->err + lo->intergral;
+  lo->ki_out += lo->ki * lo->err;
+  lo->pi_out    = lo->kp * lo->err + lo->ki_out;
   out->vel_rads = lo->pi_out;
   out->theta_rad += out->vel_rads * FP32_HZ_TO_S(cfg->freq_hz);
-  WARP_2PI(out->theta_rad);
+  WARP_PI(out->theta_rad);
 
   out->vel_rads_filter = lo->gain * out->vel_rads_filter + (FP32_1 - lo->gain) * out->vel_rads;
 }
@@ -94,29 +94,30 @@ static inline void
 pll_vel_run(pll_filter_t *pll) {
   DECL_PLL_PTRS(pll);
 
-  lo->err_theta = in->theta_rad - lo->prev_theta_rad;
-  WARP_2PI(lo->err_theta);
+  lo->err_theta_rad = in->theta_rad - lo->prev_theta_rad;
+  WARP_PI(lo->err_theta_rad);
 
   lo->pll_ffd = lo->pll_ffd * lo->gain_ffd
-                + (lo->err_theta / FP32_HZ_TO_S(cfg->freq_hz) * (FP32_1 - lo->gain_ffd));
+                + (lo->err_theta_rad / FP32_HZ_TO_S(cfg->freq_hz) * (FP32_1 - lo->gain_ffd));
 
   lo->err = in->theta_rad - out->theta_rad;
-  WARP_2PI(lo->err);
+  WARP_PI(lo->err);
 
-  lo->intergral += lo->ki * lo->err;
-  lo->pi_out = lo->kp * lo->err + lo->intergral + lo->pll_ffd;
+  lo->ki_out += lo->ki * lo->err;
+  lo->pi_out = lo->kp * lo->err + lo->ki_out + lo->pll_ffd;
 
-  out->vel_rads = lo->pi_out;
-  out->theta_rad += out->vel_rads * FP32_HZ_TO_S(cfg->freq_hz);
-  WARP_2PI(out->theta_rad);
-
+  out->vel_rads        = lo->pi_out;
   out->vel_rads_filter = lo->gain * out->vel_rads_filter + (FP32_1 - lo->gain) * out->vel_rads;
-  lo->prev_theta_rad   = out->theta_rad;
+  out->theta_rad += out->vel_rads * FP32_HZ_TO_S(cfg->freq_hz);
+  WARP_PI(out->theta_rad);
+
+  lo->prev_theta_rad = in->theta_rad;
 }
 
 static inline void
 pll_vel_run_in(pll_filter_t *pll, FP32 theta_rad) {
   DECL_PLL_PTRS(pll);
+
   in->theta_rad = theta_rad;
   pll_vel_run(pll);
 }

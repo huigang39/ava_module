@@ -5,7 +5,11 @@
 extern "C" {
 #endif
 
-#include "scheduler/sched.h"
+#include "scheduler/scheduler.h"
+
+#include "logger/logger.h"
+
+#include "fifo/fifo.h"
 
 #include "wavegenerator/sine.h"
 

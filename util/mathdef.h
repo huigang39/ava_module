@@ -5,34 +5,35 @@
 extern "C" {
 #endif
 
-#include "typedef.h"
-
 #ifdef ARM_MATH
 #include "arm_math.h"
+#endif
+
+#include <math.h>
+
 #include "fastmath.h"
+#include "typedef.h"
+
+#ifdef FAST_MATH
+#define FP32_SIN(x)    fast_sinf(x)
+#define FP32_COS(x)    fast_cosf(x)
+#define FP32_TAN(x)    fast_tanf(x)
+#define FP32_EXP(x)    fast_expf(x)
+#define FP32_ABS(x)    fast_absf(x)
+#define FP32_MOD(x, y) fmodf(x, y) // __hardfp_fmodf
+#elif defined(ARM_MATH)
 #define FP32_SIN(x)         arm_sin_f32(x)
 #define FP32_COS(x)         arm_cos_f32(x)
 #define FP32_ABS(x)         arm_abs_f32(x)
 #define FP32_ATAN2(y, x, r) arm_atan2_f32(y, x, r)
 #define FP32_EXP(x)         fast_expf(x)
-#elif defined(FAST_MATH)
-#include "fastmath.h"
-#define FP32_SIN(x) fast_sinf(x)
-#define FP32_COS(x) fast_cosf(x)
-#define FP32_TAN(x) fast_tanf(x)
-#define FP32_EXP(x) fast_expf(x)
-#define FP32_ABS(x) fast_absf(x)
 #else
-#include <math.h>
 #define FP32_SIN(x)      sinf(x)
 #define FP32_COS(x)      cosf(x)
 #define FP32_EXP(x)      expf(x)
 #define FP32_ATAN2(y, x) atan2f(y, x)
+#define FP32_MOD(x, y)   fmodf(x, y) // __hardfp_fmodf
 #endif
-
-#include <stdlib.h>
-
-#include "typedef.h"
 
 #define FP32_PI                  (3.1415926535897932384626433832795F)
 #define FP32_2PI                 (6.283185307179586476925286766559F)
@@ -120,15 +121,14 @@ extern "C" {
       (max) = (val);                                                                               \
   } while (0)
 
-#define WARP_2PI(val)                                                                              \
+#define WARP_PI(rad)                                                                               \
   do {                                                                                             \
-    if ((val) > FP32_0) {                                                                          \
-      while ((val) >= FP32_2PI)                                                                    \
-        (val) -= FP32_2PI;                                                                         \
-    } else {                                                                                       \
-      while ((val) < FP32_0)                                                                       \
-        (val) += FP32_2PI;                                                                         \
-    }                                                                                              \
+    if (FP32_ABS(rad) > FP32_2PI)                                                                  \
+      rad = FP32_MOD(rad, FP32_2PI);                                                               \
+    if (rad > FP32_PI)                                                                             \
+      rad -= FP32_2PI;                                                                             \
+    else if (rad < -FP32_PI)                                                                       \
+      rad += FP32_2PI;                                                                             \
   } while (0)
 
 #define UVW_ADD_UVW(x, y)                                                                          \

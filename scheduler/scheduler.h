@@ -5,20 +5,13 @@
 extern "C" {
 #endif
 
-#define _GNU_SOURCE
-
-#ifdef __linux__
-#include <pthread.h>
-#include <sched.h>
-#elif defined(_WIN32)
-#include <windows.h>
-#endif
+#include "thread.h"
 
 #include "util/mathdef.h"
 #include "util/typedef.h"
 
 #ifndef SCHED_TASK_MAX
-#define SCHED_TASK_MAX 255
+#define SCHED_TASK_MAX 8
 #endif
 
 typedef struct {
@@ -97,78 +90,13 @@ typedef struct {
   sched_lo_t  *prefix##_lo  = &prefix##_p->lo;                                                     \
   sched_ops_t *prefix##_ops = &prefix##_p->ops;
 
-#ifdef __linux__
-static void *
-sched_thread_fn(void *arg) {
-  sched_t *t = (sched_t *)arg;
-  while (1)
-    t->func.f_run(t);
-  return NULL;
-}
-#elif defined(_WIN32)
-static DWORD WINAPI
-sched_thread_fn(LPVOID arg) {
-  sched_t *t = (sched_t *)arg;
-  while (1)
-    t->func.f_run(t);
-  return 0;
-}
-#endif
-
-#ifdef __linux__
-static void
-bind_thread_to_cpu(pthread_t thread_tid, int cpu_id) {
-  cpu_set_t cpuset;
-  CPU_ZERO(&cpuset);
-  CPU_SET(cpu_id, &cpuset);
-
-  int ret = pthread_setaffinity_np(thread_tid, sizeof(cpu_set_t), &cpuset);
-  if (ret)
-    printf("[SCHED] Set thread affinity failed, errcode: %d\n", ret);
-  printf("[SCHED] Bind thread to CPU %d success\n", cpu_id);
-}
-#elif defined(_WIN32)
-static void
-bind_thread_to_cpu(HANDLE thread_handle, int cpu_id) {
-  DWORD_PTR mask = 1 << cpu_id;
-
-  DWORD_PTR ret = SetThreadAffinityMask(thread_handle, mask);
-  if (!ret)
-    printf("[SCHED] Set thread affinity failed, errcode: %lu\n", GetLastError());
-  printf("[SCHED] Bind thread to CPU %d success\n", cpu_id);
-}
-#endif
-
 static inline void
 sched_init(sched_t *sched, sched_cfg_t sched_cfg) {
   DECL_SCHED_PTRS(sched);
   *cfg = sched_cfg;
 
-#ifdef __linux__
-  pthread_t sched_tid;
-  int       ret = pthread_create(&sched_tid, NULL, sched_thread_fn, self);
-  if (ret != 0) {
-    printf("[SCHED] Create thread failed, errcode: %d\n", ret);
-    return;
-  }
-#elif defined(_WIN32)
-  DWORD  thread_id;
-  HANDLE sched_tid = CreateThread(NULL,            // 默认安全属性
-                                  0,               // 默认堆栈大小
-                                  sched_thread_fn, // 线程函数
-                                  self,            // 传递给线程函数的参数
-                                  0,               // 默认创建标志
-                                  &thread_id       // 用于接收线程ID
-  );
-  if (sched_tid == NULL) {
-    printf("[SCHED] Create thread failed, errcode: %lu\n", GetLastError());
-    return;
-  }
-#endif
-
-#if defined(__linux__) || defined(_WIN32)
-  bind_thread_to_cpu(sched_tid, cfg.cpu_id);
-#endif
+  // only run on Linux/Windows
+  thread_init(sched, cfg->cpu_id);
 }
 
 static inline void
@@ -197,6 +125,9 @@ sched_run(sched_t *sched) {
     if (ops->f_ts() < stat->next_run_ts)
       continue;
 
+    if (ops->f_ts() - stat->create_ts < task->delay * U32_HZ_TO_US(task->freq_hz))
+      continue;
+
     U64 begin_ts  = ops->f_ts();
     stat->e_state = SCHED_STATE_RUNNING;
     task->f_cb(task->arg);
@@ -214,6 +145,24 @@ sched_run(sched_t *sched) {
     stat->next_run_ts = ops->f_ts() + U32_HZ_TO_US(task->freq_hz);
   }
 }
+
+#ifdef __linux__
+static void *
+sched_thread_fn(void *arg) {
+  sched_t *t = (sched_t *)arg;
+  while (TRUE)
+    sched_run(t);
+  return NULL;
+}
+#elif defined(_WIN32)
+static DWORD WINAPI
+sched_thread_fn(LPVOID arg) {
+  sched_t *t = (sched_t *)arg;
+  while (TRUE)
+    sched_run(t);
+  return 0;
+}
+#endif
 
 #ifdef __cplusplus
 }

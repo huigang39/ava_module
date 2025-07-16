@@ -1,6 +1,6 @@
-/**/.vscode/
-
-/**/build/
 /**/.cache/
-
+/**/build/
 /**/compile_commands.json
+
+/**/.zed/
+/**/.vscode/

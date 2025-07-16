@@ -35,7 +35,7 @@ extern "C" {
 #define WIN_TO_UNIX_EPOCH (116444736000000000ULL)
 
 static inline U64
-get_mono_timestamp_ns(void) {
+get_mono_ts_ns(void) {
 #ifdef __linux__
   struct timespec ts;
   clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
@@ -46,25 +46,26 @@ get_mono_timestamp_ns(void) {
   QueryPerformanceCounter(&counter);
   return counter.QuadPart * 1000000000ull / frequency.QuadPart;
 #endif
+  return 0ull;
 }
 
 static inline U64
-get_mono_timestamp_us(void) {
-  return get_mono_timestamp_ns() / 1000ull;
+get_mono_ts_us(void) {
+  return get_mono_ts_ns() / 1000ull;
 }
 
 static inline U64
-get_mono_timestamp_ms(void) {
-  return get_mono_timestamp_ns() / 1000000ull;
+get_mono_ts_ms(void) {
+  return get_mono_ts_ns() / 1000000ull;
 }
 
 static inline U64
 get_mono_timestamp_s(void) {
-  return get_mono_timestamp_ns() / 1000000000ull;
+  return get_mono_ts_ns() / 1000000000ull;
 }
 
 static inline U64
-get_real_timestamp_ns(void) {
+get_real_ts_ns(void) {
 #ifdef __linux__
   struct timespec ts;
   clock_gettime(CLOCK_REALTIME, &ts);
@@ -79,35 +80,36 @@ get_real_timestamp_ns(void) {
 
   return (uli.QuadPart - WIN_TO_UNIX_EPOCH) * 100u;
 #endif
+  return 0ull;
 }
 
 static inline U64
-get_real_timestamp_us(void) {
-  return get_real_timestamp_ns() / 1000u;
+get_real_ts_us(void) {
+  return get_real_ts_ns() / 1000u;
 }
 
 static inline U64
-get_real_timestamp_ms(void) {
-  return get_real_timestamp_ns() / 1000000ull;
+get_real_ts_ms(void) {
+  return get_real_ts_ns() / 1000000ull;
 }
 
 static inline U64
-get_real_timestamp_s(void) {
-  return get_real_timestamp_ns() / 1000000000ull;
+get_real_ts_s(void) {
+  return get_real_ts_ns() / 1000000000ull;
 }
 
 static inline I32
-format_timestamp_ms(U64 timestamp_ms, char *buf, U32 len) {
-  time_t    seconds = timestamp_ms / 1000u;
-  int       milli   = timestamp_ms % 1000u;
+format_ts_ms(U64 ts_ms, char *buf, U32 len) {
+  time_t    sec = ts_ms / 1000u;
+  int       ms  = ts_ms % 1000u;
   struct tm tm_time;
 
 #ifdef __linux__
-  localtime_r(&seconds, &tm_time);
+  localtime_r(&sec, &tm_time);
 #elif defined(_WIN32)
-  localtime_s(&tm_time, &seconds);
+  localtime_s(&tm_time, &sec);
 #else
-  struct tm *tmp = localtime(&seconds);
+  struct tm *tmp = localtime(&sec);
   if (tmp)
     tm_time = *tmp;
 #endif
@@ -116,13 +118,13 @@ format_timestamp_ms(U64 timestamp_ms, char *buf, U32 len) {
   return snprintf(buf,
                   len,
                   "%04d-%02d-%02dT%02d:%02d:%02d.%03d",
-                  tm_time.tm_year + 1900,
-                  tm_time.tm_mon + 1,
+                  tm_time.tm_year + 1900u,
+                  tm_time.tm_mon + 1u,
                   tm_time.tm_mday,
                   tm_time.tm_hour,
                   tm_time.tm_min,
                   tm_time.tm_sec,
-                  milli);
+                  ms);
 }
 
 static inline void

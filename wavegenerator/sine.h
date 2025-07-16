@@ -62,7 +62,7 @@ sine_run(sine_t *sine) {
   lo->phase_inc_rad = FP32_2PI * in->freq_hz * FP32_HZ_TO_S(cfg->freq_hz);
   out->val          = in->amp_rad * FP32_SIN(in->phase_rad) + in->offset_rad;
   in->phase_rad += lo->phase_inc_rad;
-  WARP_2PI(in->phase_rad);
+  WARP_PI(in->phase_rad);
 }
 
 #ifdef __cplusplus

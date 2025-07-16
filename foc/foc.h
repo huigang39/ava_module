@@ -231,7 +231,7 @@ foc_run(foc_t *foc) {
   UVW_MUL_3ARG(in->fp32_i_uvw, in->adc_raw.i32_i_uvw, cfg->periph.adc2cur);
 
   in->theta.sensor_theta_rad = MECH_TO_ELEC(ops->f_theta_get(), cfg->motor.npp);
-  WARP_2PI(in->theta.sensor_theta_rad);
+//  WARP_PI(in->theta.sensor_theta_rad);
 
   DECL_PLL_PTRS_PREFIX(&foc->lo.pll, pll)
   pll_vel_run_in(pll_p, in->theta.sensor_theta_rad);
