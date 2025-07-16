@@ -131,6 +131,14 @@ extern "C" {
       rad += FP32_2PI;                                                                             \
   } while (0)
 
+#define WARP_2PI(rad)                                                                              \
+  do {                                                                                             \
+    if (FP32_ABS(rad) > FP32_2PI)                                                                  \
+      rad = FP32_MOD(rad, FP32_2PI);                                                               \
+    if (rad < FP32_0)                                                                              \
+      rad += FP32_2PI;                                                                             \
+  } while (0)
+
 #define UVW_ADD_UVW(x, y)                                                                          \
   do {                                                                                             \
     (x).u = (x).u + (y).u;                                                                         \
