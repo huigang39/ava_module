@@ -1,5 +1,5 @@
 TARGET      := logger_print
-DIR_BUILD   := ./build
+DIR_BUILD   := build
 BIN         := $(DIR_BUILD)/$(TARGET)
 
 DIR_INCLUDE := -I../
@@ -7,7 +7,7 @@ SRC_C 	    := $(TARGET).c
 
 CC          := gcc
 FLAGS_C     += -Wall -Wextra
-FLAGS_C     += -fsanitize=address -g
+FLAGS_C     += -g
 FLAGS_LD    += -lpthread
 
 ifeq ($(OS), Windows_NT)
@@ -29,5 +29,5 @@ $(BIN): $(SRC_C)
 	@echo "[COMPILE OBJ] $(OBJ)"
 
 clean:
-	$(RMDIR) $(OBJ)
+	$(RMDIR) $(DIR_BUILD)
 	@echo "[REMOVE OBJ] $(OBJ)"

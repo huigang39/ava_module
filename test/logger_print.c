@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <unistd.h>
 
 #include "logger/logger.h"
 
@@ -6,12 +7,12 @@ logger_t logger;
 
 static inline void
 print(FILE *file, char *str, U32 len) {
-  printf(str);
+  printf("%s", str);
 }
 
 int
 main() {
-  logger_cfg_t logger_cfg;
+  logger_cfg_t logger_cfg = {};
   logger_init(&logger, logger_cfg);
 
   logger.ops.f_print = print;

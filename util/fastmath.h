@@ -39,7 +39,7 @@ static inline FP32
 fast_sinf(FP32 x) {
   x = (x) * (57.295779513082320876798154814105f);
 
-  I32 sig = 0u;
+  I32 sig = 0;
   if (x > 0.0f) {
     while (x >= 360.0f)
       x = x - 360.0f;
@@ -59,7 +59,7 @@ fast_sinf(FP32 x) {
   FP32 b = x - 10.0f * a;
 
   FP32 y = SIN_TABLE[a] * COS_TABLE[(I32)b] + b * FP32_HOLLYST * SIN_TABLE[9u - a];
-  return (sig > 0u) ? -y : y;
+  return (sig > 0) ? -y : y;
 }
 
 static inline FP32
