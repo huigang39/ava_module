@@ -12,6 +12,7 @@ typedef struct {
   FP32          freq_hz;
   motor_param_t motor;
   FP32          kp;
+  FP32          es0;
 } smo_cfg_t;
 
 typedef struct {
@@ -58,7 +59,7 @@ smo_init(smo_obs_t *smo, smo_cfg_t smo_cfg) {
 
   pll_cfg_t pll_cfg;
   pll_cfg.freq_hz = cfg->freq_hz;
-  pll_cfg.wc      = 200.0f;
+  pll_cfg.wc      = 500.0f;
   pll_cfg.fc      = 200.0f;
   pll_cfg.damp    = 0.707f;
   pll_init(&smo->lo.pll, pll_cfg);
@@ -75,8 +76,16 @@ smo_run(smo_obs_t *smo) {
 
   AB_SUB_3ARG(lo->i_ab_obs_err, out->i_ab_obs, in->i_ab);
 
-  FP32 sign_alpha = 2 / (FP32_EXP(-lo->i_ab_obs_err.a * cfg->kp) + FP32_1) - 1.0f;
-  FP32 sign_beta  = 2 / (FP32_EXP(-lo->i_ab_obs_err.b * cfg->kp) + FP32_1) - 1.0f;
+  FP32 sign_alpha
+      = (lo->i_ab_obs_err.a > cfg->es0)
+            ? cfg->kp
+            : ((lo->i_ab_obs_err.a < -cfg->es0) ? -cfg->kp
+                                                : (cfg->kp * lo->i_ab_obs_err.a / cfg->es0));
+  FP32 sign_beta
+      = (lo->i_ab_obs_err.b > cfg->es0)
+            ? cfg->kp
+            : ((lo->i_ab_obs_err.b < -cfg->es0) ? -cfg->kp
+                                                : (cfg->kp * lo->i_ab_obs_err.b / cfg->es0));
 
   out->v_ab_emf.a = sign_alpha;
   out->v_ab_emf.b = sign_beta;

@@ -28,6 +28,7 @@ typedef struct {
   FP32 sensor_theta_rad, sensor_vel_rads;
   FP32 obs_theta_rad, obs_vel_rads;
   FP32 force_theta_rad, force_vel_rads;
+  FP32 mech_theta_rad;
 } theta_t;
 
 typedef struct {
@@ -51,6 +52,7 @@ typedef struct {
 typedef struct {
   FP32           freq_hz;
   FP32           theta_offset;
+  BOOL           is_adc_cail;
   motor_param_t  motor;
   periph_param_t periph;
 } foc_cfg_t;
@@ -72,11 +74,9 @@ typedef struct {
 } foc_out_t;
 
 typedef enum {
-  FOC_STATE_NULL,
-  FOC_STATE_CAIL,
   FOC_STATE_READY,
-  FOC_STATE_ENABLE,
   FOC_STATE_DISABLE,
+  FOC_STATE_ENABLE,
 } foc_state_e;
 
 typedef enum {
@@ -88,8 +88,13 @@ typedef enum {
 } foc_theta_e;
 
 typedef struct {
+  U32 NULL_FUNC_PTR : 1;
+} foc_stat_t;
+
+typedef struct {
   U64          exec_cnt;
   U32          elapsed;
+  foc_stat_t   stat;
   U32          adc_cail_cnt;
   foc_state_e  e_state;
   foc_theta_e  e_theta;
@@ -184,27 +189,27 @@ foc_init(foc_t *foc, foc_cfg_t foc_cfg) {
   smo_cfg_t smo_cfg;
   smo_cfg.freq_hz = cfg->freq_hz;
   smo_cfg.motor   = cfg->motor;
-  smo_cfg.kp      = 1.0f;
+  smo_cfg.kp      = 10.0f;
+  smo_cfg.es0     = 500.0f;
   smo_init(&foc->lo.smo, smo_cfg);
 }
 
 static inline void
-foc_cail(foc_t *foc) {
+foc_ready(foc_t *foc) {
   DECL_FOC_PTRS(foc);
+
+  if (cfg->is_adc_cail)
+    return;
 
   in->adc_raw = ops->f_adc_get();
   UVW_ADD_UVW(cfg->periph.adc_offset.i32_i_uvw, in->adc_raw.i32_i_uvw);
-
-  if (++lo->adc_cail_cnt >= U32_LF(cfg->periph.adc_cail_cnt_max)) {
-    U32_TO_RF(cfg->periph.adc_offset.i32_i_uvw.u, cfg->periph.adc_cail_cnt_max);
-    U32_TO_RF(cfg->periph.adc_offset.i32_i_uvw.v, cfg->periph.adc_cail_cnt_max);
-    U32_TO_RF(cfg->periph.adc_offset.i32_i_uvw.w, cfg->periph.adc_cail_cnt_max);
-    lo->e_state = FOC_STATE_READY;
+  if (++lo->adc_cail_cnt >= LF(cfg->periph.adc_cail_cnt_max)) {
+    SELF_RF(cfg->periph.adc_offset.i32_i_uvw.u, cfg->periph.adc_cail_cnt_max);
+    SELF_RF(cfg->periph.adc_offset.i32_i_uvw.v, cfg->periph.adc_cail_cnt_max);
+    SELF_RF(cfg->periph.adc_offset.i32_i_uvw.w, cfg->periph.adc_cail_cnt_max);
+    cfg->is_adc_cail = TRUE;
   }
 }
-
-static inline void
-foc_ready(foc_t *foc) {}
 
 static inline void
 foc_enable(foc_t *foc) {
@@ -230,7 +235,8 @@ foc_run(foc_t *foc) {
   UVW_SUB_UVW(in->adc_raw.i32_i_uvw, cfg->periph.adc_offset.i32_i_uvw);
   UVW_MUL_3ARG(in->fp32_i_uvw, in->adc_raw.i32_i_uvw, cfg->periph.adc2cur);
 
-  in->theta.sensor_theta_rad = MECH_TO_ELEC(ops->f_theta_get(), cfg->motor.npp);
+  in->theta.mech_theta_rad   = ops->f_theta_get();
+  in->theta.sensor_theta_rad = MECH_TO_ELEC(in->theta.mech_theta_rad, cfg->motor.npp);
   WARP_2PI(in->theta.sensor_theta_rad);
 
   DECL_PLL_PTRS_PREFIX(&foc->lo.pll, pll)
@@ -262,9 +268,6 @@ foc_run(foc_t *foc) {
   }
 
   switch (lo->e_state) {
-  case FOC_STATE_CAIL:
-    foc_cail(foc);
-    return;
   case FOC_STATE_READY:
     foc_ready(foc);
     return;

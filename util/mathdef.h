@@ -24,9 +24,10 @@ extern "C" {
 #elif defined(ARM_MATH)
 #define FP32_SIN(x)         arm_sin_f32(x)
 #define FP32_COS(x)         arm_cos_f32(x)
-#define FP32_ABS(x)         arm_abs_f32(x)
 #define FP32_ATAN2(y, x, r) arm_atan2_f32(y, x, r)
+#define FP32_ABS(x)         fast_absf(x)
 #define FP32_EXP(x)         fast_expf(x)
+#define FP32_MOD(x, y)      fmodf(x, y) // __hardfp_fmodf
 #else
 #define FP32_SIN(x)      sinf(x)
 #define FP32_COS(x)      cosf(x)
@@ -68,8 +69,8 @@ extern "C" {
 #define U32_MUL_M(val)           ((val) * (U32_M))
 #define U32_MUL_G(val)           ((val) * (U32_G))
 
-#define U32_LF(n)                ((1U) << (n))
-#define U32_RF(n)                ((1U) >> (n))
+#define LF(n)                    ((1U) << (n))
+#define RF(n)                    ((1U) >> (n))
 
 #define MIN(x, y)                ((x) < (y) ? (x) : (y))
 
@@ -89,12 +90,14 @@ extern "C" {
 #define MECH_TO_ELEC(theta, npp) ((theta) * (npp))
 #define ELEC_TO_MECH(theta, npp) ((theta) / (npp))
 
-#define U32_TO_LF(val, n)                                                                          \
+#define IS_NAN(x)                isnan(x)
+
+#define SELF_LF(val, n)                                                                            \
   do {                                                                                             \
     (val) <<= (n);                                                                                 \
   } while (0)
 
-#define U32_TO_RF(val, n)                                                                          \
+#define SELF_RF(val, n)                                                                            \
   do {                                                                                             \
     (val) >>= (n);                                                                                 \
   } while (0)
