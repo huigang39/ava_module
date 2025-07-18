@@ -71,7 +71,7 @@ smo_run(smo_obs_t *smo) {
   DECL_PLL_PTRS_PREFIX(&smo->lo.pll, pll);
 
   out->theta_rad = pll_out->theta_rad;
-  pll_run_in(pll_p, out->v_ab_emf.a, out->v_ab_emf.b);
+  pll_run_in(pll_p, out->v_ab_emf);
   out->vel_rads = pll_out->vel_rads;
 
   AB_SUB_3ARG(lo->i_ab_obs_err, out->i_ab_obs, in->i_ab);

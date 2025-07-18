@@ -38,15 +38,14 @@ typedef struct {
   const char *name;
   U32         cycles_total;
   U32         cycles_per_op;
+  FP32        ret;
 } benchmark_t;
 
-/* 整数运算 */                                                                                 \
+/* 整数运算 */                                                                                     \
 #define TEST_INT_ADD(result, iterations)                                                           \
   do {                                                                                             \
-    MEASURE_TIME(result.cycles_total, "int_add", iterations, {                                     \
-      volatile int r = int_a + int_b;                                                              \
-      (void)r;                                                                                     \
-    });                                                                                            \
+    MEASURE_TIME(result.cycles_total, "int_add", iterations, { volatile int r = int_a + int_b; }); \
+    result.ret           = r;                                                                      \
     result.cycles_per_op = result.cycles_total / iterations;                                       \
     result.name          = "int_add";                                                              \
     cnt++;                                                                                         \
@@ -54,10 +53,8 @@ typedef struct {
 
 #define TEST_INT_MUL(result, iterations)                                                           \
   do {                                                                                             \
-    MEASURE_TIME(result.cycles_total, "int_mul", iterations, {                                     \
-      volatile int r = int_a * int_b;                                                              \
-      (void)r;                                                                                     \
-    });                                                                                            \
+    MEASURE_TIME(result.cycles_total, "int_mul", iterations, { volatile int r = int_a * int_b; }); \
+    result.ret           = r;                                                                      \
     result.cycles_per_op = result.cycles_total / iterations;                                       \
     result.name          = "int_mul";                                                              \
     cnt++;                                                                                         \
@@ -65,22 +62,18 @@ typedef struct {
 
 #define TEST_INT_DIV(result, iterations)                                                           \
   do {                                                                                             \
-    MEASURE_TIME(result.cycles_total, "int_div", iterations, {                                     \
-      volatile int r = int_a / int_b;                                                              \
-      (void)r;                                                                                     \
-    });                                                                                            \
+    MEASURE_TIME(result.cycles_total, "int_div", iterations, { volatile int r = int_a / int_b; }); \
+    result.ret           = r;                                                                      \
     result.cycles_per_op = result.cycles_total / iterations;                                       \
     result.name          = "int_div";                                                              \
     cnt++;                                                                                         \
   } while (0)
 
-/* 浮点运算 */                                                                                 \
+/* 浮点运算 */                                                                                     \
 #define TEST_FLOAT_ADD(result, iterations)                                                         \
   do {                                                                                             \
-    MEASURE_TIME(result.cycles_total, "float_add", iterations, {                                   \
-      volatile float r = float_a + float_b;                                                        \
-      (void)r;                                                                                     \
-    });                                                                                            \
+    MEASURE_TIME(result.cycles_total, "float_add", iterations, { r = float_a + float_b; });        \
+    result.ret           = r;                                                                      \
     result.cycles_per_op = result.cycles_total / iterations;                                       \
     result.name          = "float_add";                                                            \
     cnt++;                                                                                         \
@@ -88,10 +81,8 @@ typedef struct {
 
 #define TEST_FLOAT_MUL(result, iterations)                                                         \
   do {                                                                                             \
-    MEASURE_TIME(result.cycles_total, "float_mul", iterations, {                                   \
-      volatile float r = float_a * float_b;                                                        \
-      (void)r;                                                                                     \
-    });                                                                                            \
+    MEASURE_TIME(result.cycles_total, "float_mul", iterations, { r = float_a * float_b; });        \
+    result.ret           = r;                                                                      \
     result.cycles_per_op = result.cycles_total / iterations;                                       \
     result.name          = "float_mul";                                                            \
     cnt++;                                                                                         \
@@ -99,22 +90,18 @@ typedef struct {
 
 #define TEST_FLOAT_DIV(result, iterations)                                                         \
   do {                                                                                             \
-    MEASURE_TIME(result.cycles_total, "float_div", iterations, {                                   \
-      volatile float r = float_a / float_b;                                                        \
-      (void)r;                                                                                     \
-    });                                                                                            \
+    MEASURE_TIME(result.cycles_total, "float_div", iterations, { r = float_a / float_b; });        \
+    result.ret           = r;                                                                      \
     result.cycles_per_op = result.cycles_total / iterations;                                       \
     result.name          = "float_div";                                                            \
     cnt++;                                                                                         \
   } while (0)
 
-/* 三角函数 */                                                                                 \
+/* 三角函数 */                                                                                     \
 #define TEST_SINF(result, iterations)                                                              \
   do {                                                                                             \
-    MEASURE_TIME(result.cycles_total, "sinf", iterations, {                                        \
-      volatile float r = sinf(angle);                                                              \
-      (void)r;                                                                                     \
-    });                                                                                            \
+    MEASURE_TIME(result.cycles_total, "sinf", iterations, { r = sinf(angle); });                   \
+    result.ret           = r;                                                                      \
     result.cycles_per_op = result.cycles_total / iterations;                                       \
     result.name          = "sinf";                                                                 \
     cnt++;                                                                                         \
@@ -122,10 +109,8 @@ typedef struct {
 
 #define TEST_COSF(result, iterations)                                                              \
   do {                                                                                             \
-    MEASURE_TIME(result.cycles_total, "cosf", iterations, {                                        \
-      volatile float r = cosf(angle);                                                              \
-      (void)r;                                                                                     \
-    });                                                                                            \
+    MEASURE_TIME(result.cycles_total, "cosf", iterations, { r = cosf(angle); });                   \
+    result.ret           = r;                                                                      \
     result.cycles_per_op = result.cycles_total / iterations;                                       \
     result.name          = "cosf";                                                                 \
     cnt++;                                                                                         \
@@ -133,10 +118,8 @@ typedef struct {
 
 #define TEST_TANF(result, iterations)                                                              \
   do {                                                                                             \
-    MEASURE_TIME(result.cycles_total, "tanf", iterations, {                                        \
-      volatile float r = tanf(angle);                                                              \
-      (void)r;                                                                                     \
-    });                                                                                            \
+    MEASURE_TIME(result.cycles_total, "tanf", iterations, { r = tanf(angle); });                   \
+    result.ret           = r;                                                                      \
     result.cycles_per_op = result.cycles_total / iterations;                                       \
     result.name          = "tanf";                                                                 \
     cnt++;                                                                                         \
@@ -145,10 +128,8 @@ typedef struct {
 #ifdef ARM_MATH
 #define TEST_ARM_SINF(result, iterations)                                                          \
   do {                                                                                             \
-    MEASURE_TIME(result.cycles_total, "arm_sinf", iterations, {                                    \
-      volatile float r = arm_sin_f32(angle);                                                       \
-      (void)r;                                                                                     \
-    });                                                                                            \
+    MEASURE_TIME(result.cycles_total, "arm_sinf", iterations, { r = arm_sin_f32(angle); });        \
+    result.ret           = r;                                                                      \
     result.cycles_per_op = result.cycles_total / iterations;                                       \
     result.name          = "arm_sinf";                                                             \
     cnt++;                                                                                         \
@@ -156,10 +137,8 @@ typedef struct {
 
 #define TEST_ARM_COSF(result, iterations)                                                          \
   do {                                                                                             \
-    MEASURE_TIME(result.cycles_total, "arm_cosf", iterations, {                                    \
-      volatile float r = arm_cos_f32(angle);                                                       \
-      (void)r;                                                                                     \
-    });                                                                                            \
+    MEASURE_TIME(result.cycles_total, "arm_cosf", iterations, { r = arm_cos_f32(angle); });        \
+    result.ret           = r;                                                                      \
     result.cycles_per_op = result.cycles_total / iterations;                                       \
     result.name          = "arm_cosf";                                                             \
     cnt++;                                                                                         \
@@ -168,10 +147,8 @@ typedef struct {
 
 #define TEST_FAST_SINF(result, iterations)                                                         \
   do {                                                                                             \
-    MEASURE_TIME(result.cycles_total, "fast_sinf", iterations, {                                   \
-      volatile float r = fast_sinf(angle);                                                         \
-      (void)r;                                                                                     \
-    });                                                                                            \
+    MEASURE_TIME(result.cycles_total, "fast_sinf", iterations, { r = fast_sinf(angle); });         \
+    result.ret           = r;                                                                      \
     result.cycles_per_op = result.cycles_total / iterations;                                       \
     result.name          = "fast_sinf";                                                            \
     cnt++;                                                                                         \
@@ -179,10 +156,8 @@ typedef struct {
 
 #define TEST_FAST_COSF(result, iterations)                                                         \
   do {                                                                                             \
-    MEASURE_TIME(result.cycles_total, "fast_cosf", iterations, {                                   \
-      volatile float r = fast_cosf(angle);                                                         \
-      (void)r;                                                                                     \
-    });                                                                                            \
+    MEASURE_TIME(result.cycles_total, "fast_cosf", iterations, { r = fast_cosf(angle); });         \
+    result.ret           = r;                                                                      \
     result.cycles_per_op = result.cycles_total / iterations;                                       \
     result.name          = "fast_cosf";                                                            \
     cnt++;                                                                                         \
@@ -190,10 +165,8 @@ typedef struct {
 
 #define TEST_FAST_TANF(result, iterations)                                                         \
   do {                                                                                             \
-    MEASURE_TIME(result.cycles_total, "fast_tanf", iterations, {                                   \
-      volatile float r = fast_tanf(angle);                                                         \
-      (void)r;                                                                                     \
-    });                                                                                            \
+    MEASURE_TIME(result.cycles_total, "fast_tanf", iterations, { r = fast_tanf(angle); });         \
+    result.ret           = r;                                                                      \
     result.cycles_per_op = result.cycles_total / iterations;                                       \
     result.name          = "fast_tanf";                                                            \
     cnt++;                                                                                         \
@@ -201,10 +174,9 @@ typedef struct {
 
 #define TEST_ATAN2F_QUAD1(result, iterations)                                                      \
   do {                                                                                             \
-    MEASURE_TIME(result.cycles_total, "atan2f_quad1", iterations, {                                \
-      volatile float r = atan2f(y_val1, x_val1);                                                   \
-      (void)r;                                                                                     \
-    });                                                                                            \
+    MEASURE_TIME(                                                                                  \
+        result.cycles_total, "atan2f_quad1", iterations, { r = atan2f(y_val1, x_val1); });         \
+    result.ret           = r;                                                                      \
     result.cycles_per_op = result.cycles_total / iterations;                                       \
     result.name          = "atan2f_quad1";                                                         \
     cnt++;                                                                                         \
@@ -212,10 +184,9 @@ typedef struct {
 
 #define TEST_ATAN2F_QUAD2(result, iterations)                                                      \
   do {                                                                                             \
-    MEASURE_TIME(result.cycles_total, "atan2f_quad2", iterations, {                                \
-      volatile float r = atan2f(y_val2, x_val2);                                                   \
-      (void)r;                                                                                     \
-    });                                                                                            \
+    MEASURE_TIME(                                                                                  \
+        result.cycles_total, "atan2f_quad2", iterations, { r = atan2f(y_val2, x_val2); });         \
+    result.ret           = r;                                                                      \
     result.cycles_per_op = result.cycles_total / iterations;                                       \
     result.name          = "atan2f_quad2";                                                         \
     cnt++;                                                                                         \
@@ -223,10 +194,9 @@ typedef struct {
 
 #define TEST_ATAN2F_QUAD3(result, iterations)                                                      \
   do {                                                                                             \
-    MEASURE_TIME(result.cycles_total, "atan2f_quad3", iterations, {                                \
-      volatile float r = atan2f(y_val3, x_val3);                                                   \
-      (void)r;                                                                                     \
-    });                                                                                            \
+    MEASURE_TIME(                                                                                  \
+        result.cycles_total, "atan2f_quad3", iterations, { r = atan2f(y_val3, x_val3); });         \
+    result.ret           = r;                                                                      \
     result.cycles_per_op = result.cycles_total / iterations;                                       \
     result.name          = "atan2f_quad3";                                                         \
     cnt++;                                                                                         \
@@ -234,22 +204,19 @@ typedef struct {
 
 #define TEST_ATAN2F_QUAD4(result, iterations)                                                      \
   do {                                                                                             \
-    MEASURE_TIME(result.cycles_total, "atan2f_quad4", iterations, {                                \
-      volatile float r = atan2f(y_val4, x_val4);                                                   \
-      (void)r;                                                                                     \
-    });                                                                                            \
+    MEASURE_TIME(                                                                                  \
+        result.cycles_total, "atan2f_quad4", iterations, { r = atan2f(y_val4, x_val4); });         \
+    result.ret           = r;                                                                      \
     result.cycles_per_op = result.cycles_total / iterations;                                       \
     result.name          = "atan2f_quad4";                                                         \
     cnt++;                                                                                         \
   } while (0)
 
-/* 其他数学函数 */                                                                           \
+/* 其他数学函数 */                                                                                 \
 #define TEST_SQRTF(result, iterations)                                                             \
   do {                                                                                             \
-    MEASURE_TIME(result.cycles_total, "sqrtf", iterations, {                                       \
-      volatile float r = sqrtf(sqrt_val);                                                          \
-      (void)r;                                                                                     \
-    });                                                                                            \
+    MEASURE_TIME(result.cycles_total, "sqrtf", iterations, { r = sqrtf(sqrt_val); });              \
+    result.ret           = r;                                                                      \
     result.cycles_per_op = result.cycles_total / iterations;                                       \
     result.name          = "sqrtf";                                                                \
     cnt++;                                                                                         \
@@ -257,10 +224,8 @@ typedef struct {
 
 #define TEST_LOGF(result, iterations)                                                              \
   do {                                                                                             \
-    MEASURE_TIME(result.cycles_total, "logf", iterations, {                                        \
-      volatile float r = logf(sqrt_val);                                                           \
-      (void)r;                                                                                     \
-    });                                                                                            \
+    MEASURE_TIME(result.cycles_total, "logf", iterations, { r = logf(sqrt_val); });                \
+    result.ret           = r;                                                                      \
     result.cycles_per_op = result.cycles_total / iterations;                                       \
     result.name          = "logf";                                                                 \
     cnt++;                                                                                         \
@@ -268,26 +233,34 @@ typedef struct {
 
 #define TEST_EXPF(result, iterations)                                                              \
   do {                                                                                             \
-    MEASURE_TIME(result.cycles_total, "expf", iterations, {                                        \
-      volatile float r = expf(sqrt_val);                                                           \
-      (void)r;                                                                                     \
-    });                                                                                            \
+    MEASURE_TIME(result.cycles_total, "expf", iterations, { r = expf(sqrt_val); });                \
+    result.ret           = r;                                                                      \
     result.cycles_per_op = result.cycles_total / iterations;                                       \
     result.name          = "expf";                                                                 \
     cnt++;                                                                                         \
   } while (0)
 
+#define TEST_FAST_EXPF(result, iterations)                                                         \
+  do {                                                                                             \
+    MEASURE_TIME(result.cycles_total, "fast_expf", iterations, { r = fast_expf(sqrt_val); });      \
+    result.ret           = r;                                                                      \
+    result.cycles_per_op = result.cycles_total / iterations;                                       \
+    result.name          = "fast_expf";                                                            \
+    cnt++;                                                                                         \
+  } while (0)
+
 #define RUN_MATH_BENCHMARKS(results, iterations)                                                   \
   do {                                                                                             \
-    volatile int   cnt   = 0;                                                                      \
-    volatile int   int_a = 123456, int_b = 789;                                                    \
-    volatile float float_a = 123.456f, float_b = 7.89f;                                            \
-    volatile float angle    = 0.785398f; /* 45 degrees in radians */                               \
-    volatile float sqrt_val = 2.0f;                                                                \
-    volatile float y_val1 = 1.0f, x_val1 = 1.0f;                                                   \
-    volatile float y_val2 = 1.0f, x_val2 = -1.0f;                                                  \
-    volatile float y_val3 = -1.0f, x_val3 = -1.0f;                                                 \
-    volatile float y_val4 = -1.0f, x_val4 = 1.0f;                                                  \
+    volatile U32  cnt   = 0;                                                                       \
+    volatile FP32 r     = 0;                                                                       \
+    volatile I32  int_a = 123456, int_b = 789;                                                     \
+    volatile FP32 float_a = 123.456f, float_b = 7.89f;                                             \
+    volatile FP32 angle    = 0.785398f; /* 45 degrees in radians */                                \
+    volatile FP32 sqrt_val = 2.0f;                                                                 \
+    volatile FP32 y_val1 = 1.0f, x_val1 = 1.0f;                                                    \
+    volatile FP32 y_val2 = 1.0f, x_val2 = -1.0f;                                                   \
+    volatile FP32 y_val3 = -1.0f, x_val3 = -1.0f;                                                  \
+    volatile FP32 y_val4 = -1.0f, x_val4 = 1.0f;                                                   \
     TEST_INT_ADD(results[cnt], iterations);                                                        \
     TEST_INT_MUL(results[cnt], iterations);                                                        \
     TEST_INT_DIV(results[cnt], iterations);                                                        \
@@ -309,6 +282,7 @@ typedef struct {
     TEST_SQRTF(results[cnt], iterations);                                                          \
     TEST_LOGF(results[cnt], iterations);                                                           \
     TEST_EXPF(results[cnt], iterations);                                                           \
+    TEST_FAST_EXPF(results[cnt], iterations);                                                      \
   } while (0)
 
 #ifdef __cplusplus

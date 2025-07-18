@@ -92,15 +92,15 @@ typedef struct {
 } foc_stat_t;
 
 typedef struct {
-  U64          exec_cnt;
-  U32          elapsed;
-  foc_stat_t   stat;
-  U32          adc_cail_cnt;
-  foc_state_e  e_state;
-  foc_theta_e  e_theta;
-  pid_ctrl_t   id_pid, iq_pid;
-  pll_filter_t pll;
-  smo_obs_t    smo;
+  U64              exec_cnt;
+  U32              elapsed;
+  foc_stat_t       stat;
+  U32              adc_cail_cnt;
+  foc_state_e      e_state;
+  foc_theta_e      e_theta;
+  pid_ctrl_t       id_pid, iq_pid;
+  vel_pll_filter_t vel_pll;
+  smo_obs_t        smo;
 } foc_lo_t;
 
 typedef adc_raw_t (*foc_adc_get_f)(void);
@@ -184,7 +184,7 @@ foc_init(foc_t *foc, foc_cfg_t foc_cfg) {
   pll_cfg.wc      = 200.0f;
   pll_cfg.fc      = 200.0f;
   pll_cfg.damp    = 0.707f;
-  pll_init(&foc->lo.pll, pll_cfg);
+  vel_pll_init(&foc->lo.vel_pll, pll_cfg);
 
   smo_cfg_t smo_cfg;
   smo_cfg.freq_hz = cfg->freq_hz;
@@ -239,9 +239,9 @@ foc_run(foc_t *foc) {
   in->theta.sensor_theta_rad = MECH_TO_ELEC(in->theta.mech_theta_rad, cfg->motor.npp);
   WARP_2PI(in->theta.sensor_theta_rad);
 
-  DECL_PLL_PTRS_PREFIX(&foc->lo.pll, pll)
-  pll_vel_run_in(pll_p, in->theta.sensor_theta_rad);
-  in->theta.sensor_vel_rads = pll_out->vel_rads_filter;
+  DECL_VEL_PLL_PTRS_PREFIX(&foc->lo.vel_pll, vel_pll)
+  vel_pll_run_in(vel_pll_p, in->theta.sensor_theta_rad);
+  in->theta.sensor_vel_rads = vel_pll_out->vel_rads_filter;
 
   DECL_SMO_PTRS_PREFIX(&foc->lo.smo, smo);
   smo_run_in(smo_p, in->i_ab, out->v_ab);
