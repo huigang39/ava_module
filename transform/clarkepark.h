@@ -1,5 +1,5 @@
-#ifndef TRANSFORM_H
-#define TRANSFORM_H
+#ifndef CLARKEPARK_H
+#define CLARKEPARK_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -46,4 +46,4 @@ inv_park(fp32_dq_t fp32_dq, FP32 theta) {
 }
 #endif
 
-#endif // !TRANSFORM_H
+#endif // !CLARKEPARK_H

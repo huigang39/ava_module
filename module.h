@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include "comm/net.h"
+// #include "comm/net.h"
 
 #include "scheduler/scheduler.h"
 
@@ -15,6 +15,9 @@ extern "C" {
 
 #include "wavegenerator/sine.h"
 
+#include "transform/clarkepark.h"
+#include "transform/fft.h"
+
 #include "controller/pid.h"
 
 #include "observer/smo.h"
@@ -23,9 +26,9 @@ extern "C" {
 #include "filter/pll.h"
 
 #include "foc/foc.h"
-#include "foc/transform.h"
 
 #include "util/benchmark.h"
+#include "util/errdef.h"
 #include "util/mathdef.h"
 #include "util/typedef.h"
 #include "util/util.h"

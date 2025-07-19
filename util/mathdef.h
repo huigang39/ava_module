@@ -20,14 +20,16 @@ extern "C" {
 #define FP32_TAN(x)    fast_tanf(x)
 #define FP32_EXP(x)    fast_expf(x)
 #define FP32_ABS(x)    fast_absf(x)
-#define FP32_MOD(x, y) fmodf(x, y) // __hardfp_fmodf
+#define FP32_SQRT(x)   fast_sqrtf(x)
+#define FP32_MOD(x, y) fast_modf(x, y) // __hardfp_fmodf
 #elif defined(ARM_MATH)
 #define FP32_SIN(x)         arm_sin_f32(x)
 #define FP32_COS(x)         arm_cos_f32(x)
 #define FP32_ATAN2(y, x, r) arm_atan2_f32(y, x, r)
 #define FP32_ABS(x)         fast_absf(x)
 #define FP32_EXP(x)         fast_expf(x)
-#define FP32_MOD(x, y)      fmodf(x, y) // __hardfp_fmodf
+#define FP32_SQRT(x)        fast_sqrtf(x)
+#define FP32_MOD(x, y)      fast_modf(x, y) // __hardfp_fmodf
 #else
 #define FP32_SIN(x)      sinf(x)
 #define FP32_COS(x)      cosf(x)

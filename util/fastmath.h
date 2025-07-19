@@ -90,6 +90,16 @@ fast_absf(FP32 x) {
   return y;
 }
 
+static inline FP32
+fast_sqrtf(FP32 x) {
+  return sqrtf(x);
+}
+
+static inline FP32
+fast_modf(FP32 x, FP32 y) {
+  return fmodf(x, y);
+}
+
 #ifdef __cpluscplus
 }
 #endif
