@@ -6,7 +6,7 @@ extern "C" {
 #endif
 
 #ifndef FFT_POINT_SIZE
-#define FFT_POINT_SIZE (LF(8))
+#define FFT_POINT_SIZE (LF(6))
 #endif
 
 #ifdef ARM_MATH
@@ -19,8 +19,8 @@ extern "C" {
 
 typedef struct {
   FP32                       sample_rate_hz;
-  arm_rfft_fast_instance_f32 S;
   U8                         flag;
+  arm_rfft_fast_instance_f32 S;
 } fft_cfg_t;
 
 typedef struct {
