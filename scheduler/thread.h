@@ -7,7 +7,10 @@ extern "C" {
 
 #include <stdio.h>
 
+#ifndef __USE_GNU
 #define __USE_GNU
+#endif
+
 #ifdef __linux__
 #include <pthread.h>
 #include <sched.h>

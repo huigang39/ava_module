@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-//#include "comm/net.h"
+#include "comm/net.h"
 
 #include "scheduler/scheduler.h"
 
